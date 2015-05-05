@@ -76,3 +76,12 @@ These client events are sent as JSON strings
 Changes are stored as business domain events
 Events store is append only and immutable
 Front end validation format only, no read model
+
+* References
+[[http://martinfowler.com/eaaDev/EventSourcing.html][Martin Fowler]]
+[[http://docs.geteventstore.com/introduction/event-sourcing-basics/][Geteventstore event sourcing basics]]
+[[http://en.wikipedia.org/wiki/Object-relational_impedance_mismatch][Object-relational impedance mismatch]]
+[[https://msdn.microsoft.com/en-us/library/jj591559.aspx][Microsoft introducing event sourcing]]
+[[https://msdn.microsoft.com/en-us/library/dn589792.aspx][Microsoft event sourcing pattern]]
+[[https://msdn.microsoft.com/en-us/library/jj591577.aspx][Microsoft CQRS & ES deep dive]]
+[[http://talks.golang.org/2015/json.slide][Parsing JSON in Go]]
