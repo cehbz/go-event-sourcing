@@ -28,7 +28,7 @@ type Event interface {
 
 type MSI map[string]interface{}
 type ClientMeal struct {
-	Client      uuid.UUID `json:"id""`
+	Client      uuid.UUID `json:"id"`
 	Location    string    `json:"location"`
 	Date        time.Time `json:"date"`
 	Meal        int       `json:"meal"`
