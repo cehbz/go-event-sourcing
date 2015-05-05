@@ -1,3 +1,9 @@
+Event Sourcing In Go
+5 May 2015
+
+Charles Haynes
+ceh@ceh.bz
+
 * What is event sourcing?
 
 "all changes to application state are stored as a sequence of events"
