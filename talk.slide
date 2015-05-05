@@ -14,7 +14,7 @@ ceh@ceh.bz
 "[T]here are times when we don't just want to see where we are, we also want to know how we got there."
 -- Martin Fowler
 
-You already are. Your bank statement is an event store.
+You're already using it. Your bank statement is an event store.
 
 * How do you implement it in Go?
 
@@ -33,174 +33,46 @@ POST a checkin
 POST your login
 
 * Client event request
-GETs are not events
-Client events are JSON strings
+These client events are sent as JSON strings
 
-* Parsed into struct
-`map[string]interface{}`
-```type MealCheckinClientEvent struct {
-	ClientID UUID
-	Meal int
-	Date time.Date
-	Location string
-}```
+.code main.go /^type MSI/,/^}/
+
+* Parsed into ClientMeal struct via map[string]interface{}
+.code main.go /^func ParseMSI/,/^}/
+
+* Parsed into ClientMeal struct directly
+.code main.go /^func ParseClientMeal/,/^}/
 
 * Validation
-```type ClientEvent interface {
-	func Valid() error
-}```
+.code main.go /^type ClientEvent/,/^}/
+.code main.go /^func \(cm ClientMeal\) Valid/,/^}/
 
 * Converted into domain event
-```type MealCheckinEvent struct {
-	Timestamp time.Date
-	ClientID UUID
-	Meal int
-	Date time.Date
-	Location string
-}```
+.code main.go /^type Meal/,/^}/
+.code main.go /^func NewMeal/,/^}/
 
 * Stored
-Append to a flat file
-`json.Marshal()`
+.code main.go /^func WriteEvent/,/^}/
+
+* Sent
+.code main.go /^func EventHandler/,/^}/
 
 * Handled
-`type Event interface {
-      func Handle() error
-}`
+.code main.go /^func \(m Meal\) Handle/,/^}/
 
-* Check in a meal
-Time/Date
-Location
-Comments
+* Read Model
 
-* Log In
-Convert password
+.code main.go /^type Client struct/,/var clients map/
 
-* Get my checkins
-What does the read model look like?
+* Get my badges
 
-* Retroactively add a new badge type
+.code main.go /^func badges/,/^}/
 
+* Get Badges Handler
+.code main.go /func \(g GetBadges\) Handle/,/^}/
 
+* Summary
 
-
-[[http://martinfowler.com/eaaDev/EventSourcing.html][Martin Fowler]]
-
-Keep previous state as part of even transition, but deltas are the truth (previous state is a cache, it's computable from previous event stream)
-
-Auditablility
-
-Replayability ("fix and replay")
-
-Temporal Queries
-
-Retroactive events
-
-Internal versus external events
-
-Events come from the business domain, not the implementation
-
-
-[[http://docs.geteventstore.com/introduction/event-sourcing-basics/][Geteventstore event sourcing basics]]
-
-Event store as a functional database
-
-Use verbs in the past tense, not commands
-
-"append-only architectures distribute more easily than updating architectures because there are far fewer locks to deal with."
--- Geteventstore
-
-Scale by partitioning (functional [e.g. geographic] or replication [sharding])
-
-Impedance mismatch [between Object and Relational, between Event and Object]
-[[http://en.wikipedia.org/wiki/Object-relational_impedance_mismatch][Object-relational impedance mismatch]]
-(set based thinking versus subtype based thinking)
-
-"Current State is a left fold of previous facts. ... an Event Store is actually a functional database."
--- Geteventstore
-
-[[https://msdn.microsoft.com/en-us/library/jj591559.aspx][Microsoft introducing event sourcing]]
-[[https://msdn.microsoft.com/en-us/library/dn589792.aspx][Microsoft event sourcing pattern]]
-[[https://msdn.microsoft.com/en-us/library/jj591577.aspx][Microsoft CQRS & ES deep dive]]
-
-"events should describe business intent"
--- Microsoft
-
-Events are immutable. Immutable + Append only allows performance
-
-Debugging - replay events to observe problems
-
-"Implementing a message-driven system is far from simple"
--- Microsoft
-
-Difference between events and transactions
-"events capture intent in addition to recording the facts of what happened"
--- Microsoft
-
-Concurrency you can either allow multiple updates for the same state (best if possible), or timestamps, or serialise the state and use state ids.
-
-Materialised views
-
-JSON vs XML
-protobuffers or capnproto or gob
-snapshots
-
-Side effects on replay (Separate side-effect and state change, only do side-effect on state save, pub/sub for side effects)
-Reporting (and other queries - materialised view "read model", pub/sub)
-Concurrent writes (eventual consistency, but define your needs)
-
-What do you do when event meaning changes in the domain?
-Update your event handler
-Don't rewrite events. [immutable]
-Possibly version your events - new "semantics" are actually a new kind of event
-
-Validation
-Execution
-Client events
-Domain events
-
-Events as they come from the client
-XML/SOAP
-JSON
-
-Translate to internal client event representation
-Text -> map[string]interface{}
-Text -> client event struct
-Custom JSON serializers
-timestamps or serial numbers?
-trace ids
-validation
-
-Translate that to internal domain event representation
-copy map -> struct with transformation
-copy event -> event with transformation
-transform event in place
-add UUIDs for created objects?
-don't store passwords, salt and hash them
-be careful about logging
-
-Store events
-Append only
-Immutable
-Flat text files!
-Geteventstore
-Redis
-NoSQL (Mongo)
-SQL (Postgres)
-
-Injection attacks
-Just because you don't have SQL doesn't mean you can't get injection
-
-Handle events
-Send domain events to the vent processor
-Process in one place, or process per-event
-
-Replay on startup
-process from event store using same event handler. simple!
-Idempotence - side effect on store
-This is why your create events need object ids
-
-Use channels for sharing
-most events are asynchronous
-get is synchronous, use a channel for reply
-
+Changes are stored as business domain events
+Events store is append only and immutable
+Front end validation format only, no read model
